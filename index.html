@@ -1,73 +1,675 @@
-Today
-Progress
 
-Connecting...
-Daily Plan of Action
-"G-d, I cannot manage my life. Please help me."
-←
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Recovery Dashboard</title>
+<style>
+:root {
+  --bg: #faf9f7; --surface: #ffffff; --border: #e8e4dc; --border-mid: #d4cfc5;
+  --text: #1a1916; --text-mid: #6b6760; --text-soft: #a09c95;
+  --green: #1D9E75; --green-light: #e1f5ee; --green-mid: #9FE1CB; --green-dark: #0F6E56;
+  --sleep-c: #1a5fa0; --prayer-c: #9a6200; --recovery-c: #b02020; --torah-c: #0e6645;
+  --radius: 12px; --radius-sm: 8px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Georgia, 'Times New Roman', serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 1.25rem 1.5rem; }
+.page { max-width: 880px; margin: 0 auto; }
+.tab-nav { display: flex; gap: 4px; margin-bottom: 1.25rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 4px; width: fit-content; }
+.tab-btn { padding: 7px 22px; border-radius: 6px; border: none; background: none; font-size: 13px; font-family: Georgia, serif; font-weight: 700; color: var(--text-mid); cursor: pointer; transition: all 0.15s; }
+.tab-btn.active { background: var(--green); color: white; }
+.tab-btn:not(.active):hover { background: var(--bg); color: var(--text); }
+.tab-panel { display: none; } .tab-panel.active { display: block; }
+.header { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 1.25rem; }
+.header h1 { font-size: 21px; font-weight: 700; }
+.tagline { font-size: 13px; color: var(--text-soft); font-style: italic; margin-top: 2px; }
+.date-nav { display: flex; align-items: center; gap: 8px; }
+.nav-btn { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); width: 32px; height: 32px; cursor: pointer; font-size: 14px; color: var(--text-mid); display: flex; align-items: center; justify-content: center; }
+.today-btn { background: var(--green); border: none; border-radius: var(--radius-sm); padding: 0 14px; height: 32px; font-size: 12px; color: white; cursor: pointer; font-weight: 700; font-family: Georgia, serif; }
+.date-display { font-size: 14px; font-weight: 600; min-width: 210px; text-align: center; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.25rem; }
+.section-label { font-size: 11px; font-weight: 700; color: var(--text-soft); letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 12px; }
+.progress-section { display: flex; align-items: center; gap: 1.25rem; }
+.ring-wrap { position: relative; width: 72px; height: 72px; flex-shrink: 0; }
+.ring-wrap svg { transform: rotate(-90deg); }
+.ring-pct { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; }
+.progress-meta { flex: 1; }
+.progress-title { font-size: 16px; font-weight: 700; margin-bottom: 3px; }
+.progress-sub { font-size: 13px; color: var(--text-mid); }
+.bar-bg { background: var(--border); border-radius: 99px; height: 7px; overflow: hidden; margin-top: 8px; }
+.bar-fill { background: var(--green); height: 100%; border-radius: 99px; transition: width 0.4s ease; }
+.streak-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 12px; }
+.streak-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 11px 14px; }
+.streak-num { font-size: 22px; font-weight: 700; }
+.streak-label { font-size: 11px; color: var(--text-soft); margin-top: 2px; line-height: 1.3; }
+.pillars { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+.pillar { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.pillar-head { padding: 9px 14px 8px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+.pillar-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.pillar-title { font-size: 13px; font-weight: 700; }
+.pillar-count { margin-left: auto; font-size: 12px; color: var(--text-soft); font-weight: 600; }
+.habits { padding: 9px 14px 13px; display: flex; flex-direction: column; gap: 6px; }
+.habit-row { display: flex; align-items: flex-start; gap: 9px; cursor: pointer; user-select: none; padding: 1px 0; }
+.habit-check { width: 17px; height: 17px; border: 1.5px solid var(--border-mid); border-radius: 4px; flex-shrink: 0; margin-top: 2px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+.habit-check.done { background: var(--green); border-color: var(--green); }
+.habit-check.done::after { content:''; display:block; width:4px; height:8px; border:1.5px solid white; border-top:none; border-left:none; transform:rotate(45deg) translate(-1px,-1px); }
+.habit-row:hover .habit-check:not(.done) { border-color: var(--green); }
+.habit-label { font-size: 13px; line-height: 1.4; }
+.habit-row.done .habit-label { color: var(--text-soft); text-decoration: line-through; }
+.habit-note { font-size: 11px; color: var(--text-soft); font-style: italic; margin-top: 1px; }
+.counter-row { display: flex; align-items: center; gap: 7px; margin-top: 3px; }
+.cbtn { background: var(--bg); border: 1px solid var(--border); border-radius: 5px; width: 24px; height: 24px; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; color: var(--text-mid); font-weight: 700; }
+.cbtn:hover { border-color: var(--green); color: var(--green); }
+.cval { font-size: 14px; font-weight: 700; min-width: 18px; text-align: center; }
+.clabel { font-size: 12px; color: var(--text-soft); }
+.week-strip { display: grid; grid-template-columns: repeat(7,1fr); gap: 6px; }
+.day-col { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.day-name { font-size: 10px; color: var(--text-soft); }
+.day-circle { width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: var(--text-mid); cursor: pointer; transition: all 0.15s; }
+.day-circle:hover { border-color: var(--green); color: var(--green); }
+.day-circle.today { border: 2px solid var(--green); color: var(--text); font-weight: 700; }
+.day-circle.full { background: var(--green); border-color: var(--green); color: white; }
+.day-circle.partial { background: var(--green-light); border-color: var(--green-mid); color: var(--green-dark); }
+.day-pct { font-size: 9px; color: var(--text-soft); height: 11px; }
+.notes-section textarea { width: 100%; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 10px; font-size: 13px; font-family: Georgia, serif; color: var(--text); background: var(--bg); resize: none; line-height: 1.6; outline: none; transition: border 0.15s; }
+.notes-section textarea:focus { border-color: var(--green); }
+.save-ind { font-size: 11px; color: var(--text-soft); margin-top: 4px; height: 14px; font-style: italic; }
+.sync-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; padding: 8px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 12px; color: var(--text-soft); }
+.sync-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); flex-shrink: 0; transition: background 0.3s; }
+.sync-dot.synced { background: var(--green); }
+.sync-dot.syncing { background: var(--prayer-c); animation: pulse 1s infinite; }
+.sync-dot.error { background: var(--recovery-c); }
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.4} }
+.prog-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 10px; }
+.prog-header h2 { font-size: 18px; font-weight: 700; }
+.range-btns { display: flex; gap: 4px; }
+.range-btn { padding: 5px 14px; border: 1px solid var(--border); border-radius: 6px; background: none; font-size: 12px; font-family: Georgia, serif; font-weight: 700; color: var(--text-mid); cursor: pointer; transition: all 0.15s; }
+.range-btn.active { background: var(--green); color: white; border-color: var(--green); }
+.heatmap-grid { display: flex; flex-wrap: wrap; gap: 3px; }
+.hm-cell { width: 14px; height: 14px; border-radius: 3px; }
+.hm-cell.p0 { background: var(--border); } .hm-cell.p1 { background: #9FE1CB; } .hm-cell.p2 { background: #5DCAA5; } .hm-cell.p3 { background: #1D9E75; } .hm-cell.p4 { background: #0F6E56; }
+.hm-legend { display: flex; align-items: center; gap: 6px; margin-top: 10px; font-size: 11px; color: var(--text-soft); }
+.hm-legend-cells { display: flex; gap: 3px; }
+.bars-wrap { display: flex; align-items: flex-end; gap: 5px; height: 130px; }
+.bar-col-c { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; height: 100%; justify-content: flex-end; }
+.bar-fill-el { width: 100%; border-radius: 4px 4px 0 0; background: var(--green); min-height: 2px; }
+.bar-lbl { font-size: 9px; color: var(--text-soft); text-align: center; margin-top: 3px; }
+.bar-val-lbl { font-size: 9px; color: var(--text-mid); font-weight: 700; }
+.pillar-bars { display: flex; flex-direction: column; gap: 11px; }
+.pb-row { display: flex; align-items: center; gap: 10px; }
+.pb-label { font-size: 12px; font-weight: 700; width: 130px; flex-shrink: 0; }
+.pb-track { flex: 1; background: var(--border); border-radius: 99px; height: 10px; overflow: hidden; }
+.pb-fill { height: 100%; border-radius: 99px; transition: width 0.5s ease; }
+.pb-pct { font-size: 12px; font-weight: 700; color: var(--text-mid); width: 36px; text-align: right; flex-shrink: 0; }
+.weekly-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.weekly-table th { font-size: 11px; font-weight: 700; color: var(--text-soft); text-align: left; padding: 0 8px 8px; letter-spacing: 0.4px; text-transform: uppercase; }
+.weekly-table td { padding: 7px 8px; border-top: 1px solid var(--border); }
+.weekly-table tr:hover td { background: var(--bg); }
+.pill { display: inline-flex; align-items: center; padding: 2px 10px; border-radius: 99px; font-size: 11px; font-weight: 700; }
+.pill-green { background: var(--green-light); color: var(--green-dark); }
+.pill-amber { background: #fdf3e0; color: #9a6200; }
+.pill-red { background: #fdecea; color: #b02020; }
+.stat-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 14px; }
+.stat-mini { background: var(--bg); border-radius: var(--radius-sm); padding: 10px 12px; border: 1px solid var(--border); }
+.stat-mini-num { font-size: 22px; font-weight: 700; }
+.stat-mini-label { font-size: 11px; color: var(--text-soft); margin-top: 2px; }
+@media (max-width:600px) {
+  .pillars { grid-template-columns: 1fr; }
+  .streak-row, .stat-grid { grid-template-columns: repeat(2,1fr); }
+  .pb-label { width: 80px; font-size: 11px; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab('today',this)">Today</button>
+    <button class="tab-btn" onclick="switchTab('progress',this)">Progress</button>
+  </div>
+  <div class="sync-bar">
+    <div class="sync-dot syncing" id="syncDot"></div>
+    <span id="syncLabel">Connecting...</span>
+  </div>
 
-→
-Today
-0%
-Start your day
-0 of 15 habits complete
+  <div class="tab-panel active" id="tab-today">
+    <div class="header">
+      <div>
+        <h1>Daily Plan of Action</h1>
+        <div class="tagline">"G-d, I cannot manage my life. Please help me."</div>
+      </div>
+      <div class="date-nav">
+        <button class="nav-btn" onclick="changeDay(-1)">&#8592;</button>
+        <div class="date-display" id="dateDisplay"></div>
+        <button class="nav-btn" onclick="changeDay(1)">&#8594;</button>
+        <button class="today-btn" onclick="goToday()">Today</button>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:12px">
+      <div class="progress-section">
+        <div class="ring-wrap">
+          <svg width="72" height="72" viewBox="0 0 72 72">
+            <circle cx="36" cy="36" r="30" fill="none" stroke="#e8e4dc" stroke-width="6"/>
+            <circle cx="36" cy="36" r="30" fill="none" stroke="#1D9E75" stroke-width="6" stroke-linecap="round"
+              id="progressCircle" stroke-dasharray="188.5" stroke-dashoffset="188.5" style="transition:stroke-dashoffset 0.4s ease"/>
+          </svg>
+          <div class="ring-pct" id="ringPct">0%</div>
+        </div>
+        <div class="progress-meta">
+          <div class="progress-title" id="progressTitle">Start your day</div>
+          <div class="progress-sub" id="progressSub">0 of 15 habits complete</div>
+          <div class="bar-bg"><div class="bar-fill" id="progressBarFill" style="width:0%"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="streak-row">
+      <div class="streak-card"><div class="streak-num" id="streakNum">0</div><div class="streak-label">day streak</div></div>
+      <div class="streak-card"><div class="streak-num" id="meetingsNum">0/7</div><div class="streak-label">meetings this week</div></div>
+      <div class="streak-card"><div class="streak-num" id="callsNum">0/3</div><div class="streak-label">calls today</div></div>
+      <div class="streak-card"><div class="streak-num" id="totalNum">0</div><div class="streak-label">days tracked</div></div>
+    </div>
+    <div class="pillars">
+      <div class="pillar">
+        <div class="pillar-head"><div class="pillar-dot" style="background:var(--sleep-c)"></div><div class="pillar-title" style="color:var(--sleep-c)">Sleep &amp; Body</div><div class="pillar-count" id="cnt-sleep">0/4</div></div>
+        <div class="habits">
+          <div class="habit-row" onclick="toggle('s_bed')" id="row-s_bed"><div class="habit-check" id="chk-s_bed"></div><div><div class="habit-label">In bed by 10 pm</div><div class="habit-note">pajamas on, teeth brushed</div></div></div>
+          <div class="habit-row" onclick="toggle('s_rise')" id="row-s_rise"><div class="habit-check" id="chk-s_rise"></div><div><div class="habit-label">Out of bed by 7 am</div></div></div>
+          <div class="habit-row" onclick="toggle('s_cal')" id="row-s_cal"><div class="habit-check" id="chk-s_cal"></div><div><div class="habit-label">5 min calisthenics</div><div class="habit-note">upon waking</div></div></div>
+          <div class="habit-row" onclick="toggle('s_cardio')" id="row-s_cardio"><div class="habit-check" id="chk-s_cardio"></div><div><div class="habit-label">20+ min cardio</div><div class="habit-note">walk / run / bike</div></div></div>
+        </div>
+      </div>
+      <div class="pillar">
+        <div class="pillar-head"><div class="pillar-dot" style="background:var(--prayer-c)"></div><div class="pillar-title" style="color:var(--prayer-c)">Prayer</div><div class="pillar-count" id="cnt-prayer">0/3</div></div>
+        <div class="habits">
+          <div class="habit-row" onclick="toggle('p_shach')" id="row-p_shach"><div class="habit-check" id="chk-p_shach"></div><div><div class="habit-label">Shacharis</div><div class="habit-note">early, in shul — begin with surrender prayer</div></div></div>
+          <div class="habit-row" onclick="toggle('p_talk')" id="row-p_talk"><div class="habit-check" id="chk-p_talk"></div><div><div class="habit-label">Talk to G-d throughout the day</div></div></div>
+          <div class="habit-row" onclick="toggle('p_shema')" id="row-p_shema"><div class="habit-check" id="chk-p_shema"></div><div><div class="habit-label">Krias Shema al Hamitah</div><div class="habit-note">abridged if needed</div></div></div>
+        </div>
+      </div>
+      <div class="pillar">
+        <div class="pillar-head"><div class="pillar-dot" style="background:var(--recovery-c)"></div><div class="pillar-title" style="color:var(--recovery-c)">Recovery</div><div class="pillar-count" id="cnt-recovery">0/4</div></div>
+        <div class="habits">
+          <div class="habit-row" onclick="toggle('r_bb')" id="row-r_bb"><div class="habit-check" id="chk-r_bb"></div><div><div class="habit-label">1 page Big Book</div></div></div>
+          <div class="habit-row" onclick="toggle('r_wb')" id="row-r_wb"><div class="habit-check" id="chk-r_wb"></div><div><div class="habit-label">Workbook assignment</div></div></div>
+          <div class="habit-row" style="cursor:default;align-items:center">
+            <div><div class="habit-label">Recovery calls</div>
+              <div class="counter-row">
+                <button class="cbtn" onclick="adjustCounter('calls',-1)">&#8722;</button>
+                <span class="cval" id="val-calls">0</span>
+                <button class="cbtn" onclick="adjustCounter('calls',1)">+</button>
+                <span class="clabel">of 3 today</span>
+              </div>
+              <div class="habit-note">call immediately at any urge</div>
+            </div>
+          </div>
+          <div class="habit-row" style="cursor:default;align-items:center">
+            <div><div class="habit-label">Meeting attendance</div>
+              <div class="counter-row">
+                <button class="cbtn" onclick="adjustCounter('meetings',-1)">&#8722;</button>
+                <span class="cval" id="val-meetings">0</span>
+                <button class="cbtn" onclick="adjustCounter('meetings',1)">+</button>
+                <span class="clabel">today &nbsp;·&nbsp; <span id="week-meetings">0</span>/7 this week</span>
+              </div>
+              <div class="habit-note">share at least twice per week</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="pillar">
+        <div class="pillar-head"><div class="pillar-dot" style="background:var(--torah-c)"></div><div class="pillar-title" style="color:var(--torah-c)">Torah &amp; Chassidus</div><div class="pillar-count" id="cnt-torah">0/5</div></div>
+        <div class="habits">
+          <div class="habit-row" onclick="toggle('t_chitas')" id="row-t_chitas"><div class="habit-check" id="chk-t_chitas"></div><div><div class="habit-label">Chitas</div></div></div>
+          <div class="habit-row" onclick="toggle('t_rambam')" id="row-t_rambam"><div class="habit-check" id="chk-t_rambam"></div><div><div class="habit-label">Rambam</div></div></div>
+          <div class="habit-row" onclick="toggle('t_gemara')" id="row-t_gemara"><div class="habit-check" id="chk-t_gemara"></div><div><div class="habit-label">3 min Gemara</div></div></div>
+          <div class="habit-row" onclick="toggle('t_chas')" id="row-t_chas"><div class="habit-check" id="chk-t_chas"></div><div><div class="habit-label">1 page Chassidus</div></div></div>
+          <div class="habit-row" onclick="toggle('t_mishnayos')" id="row-t_mishnayos"><div class="habit-check" id="chk-t_mishnayos"></div><div><div class="habit-label">2 min Mishnayos</div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:12px">
+      <div class="section-label">This Week</div>
+      <div class="week-strip" id="weekGrid"></div>
+    </div>
+    <div class="card notes-section">
+      <div class="section-label">Reflection &amp; Notes</div>
+      <textarea id="noteArea" rows="3" placeholder="Gratitude, struggles, awareness, what G-d showed you today..."></textarea>
+      <div class="save-ind" id="saveIndicator">&nbsp;</div>
+    </div>
+    <div class="card" style="margin-bottom:0;margin-top:12px">
+      <div style="display:flex;align-items:center;gap:1.25rem">
+        <div style="position:relative;width:80px;height:80px;flex-shrink:0">
+          <svg width="80" height="80" viewBox="0 0 80 80" style="transform:rotate(-90deg)">
+            <circle cx="40" cy="40" r="34" fill="none" stroke="#e8e4dc" stroke-width="7"/>
+            <circle cx="40" cy="40" r="34" fill="none" stroke="#1a5fa0" stroke-width="7" stroke-linecap="round" id="sobCircle" stroke-dasharray="213.6" stroke-dashoffset="213.6" style="transition:stroke-dashoffset 0.5s ease"/>
+          </svg>
+          <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+            <div style="font-size:16px;font-weight:700;line-height:1" id="sobDays">0</div>
+            <div style="font-size:10px;color:#a09c95;margin-top:2px;letter-spacing:0.4px">days</div>
+          </div>
+        </div>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:700;margin-bottom:2px" id="sobTitle">One day at a time</div>
+          <div style="font-size:11px;color:#a09c95;margin-bottom:8px" id="sobSub">toward 30 days</div>
+          <div style="display:flex;gap:5px;flex-wrap:wrap" id="sobMilestones"></div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:10px;border-top:0.5px solid #e8e4dc">
+            <div style="font-size:11px;color:#a09c95">Sobriety date:</div>
+            <input type="date" id="sobDate" onchange="updateSobriety()" style="font-size:12px;font-family:Georgia,serif;padding:3px 8px;border:0.5px solid #d4cfc5;border-radius:6px;background:#faf9f7;color:#1a1916"/>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+  </div>
 
-0
-day streak
-0/7
-meetings this week
-0/3
-calls today
-0
-days tracked
+  <div class="tab-panel" id="tab-progress">
+    <div class="prog-header">
+      <h2>Long-Term Progress</h2>
+      <div class="range-btns">
+        <button class="range-btn active" onclick="setRange(4,this)">4 weeks</button>
+        <button class="range-btn" onclick="setRange(12,this)">12 weeks</button>
+        <button class="range-btn" onclick="setRange(26,this)">6 months</button>
+      </div>
+    </div>
+    <div class="stat-grid" id="summaryStats"></div>
+    <div class="card" style="margin-bottom:12px">
+      <div class="section-label">Streak Calendar</div>
+      <div id="hmMonthRow" style="display:flex;gap:0;margin-bottom:5px;font-size:10px;color:var(--text-soft);min-height:14px"></div>
+      <div class="heatmap-grid" id="heatmapGrid"></div>
+      <div class="hm-legend"><span>Less</span><div class="hm-legend-cells"><div class="hm-cell p0" style="width:12px;height:12px"></div><div class="hm-cell p1" style="width:12px;height:12px"></div><div class="hm-cell p2" style="width:12px;height:12px"></div><div class="hm-cell p3" style="width:12px;height:12px"></div><div class="hm-cell p4" style="width:12px;height:12px"></div></div><span>More</span></div>
+    </div>
+    <div class="card" style="margin-bottom:12px">
+      <div class="section-label">Weekly Completion %</div>
+      <div class="bars-wrap" id="weeklyBars"></div>
+    </div>
+    <div class="card" style="margin-bottom:12px">
+      <div class="section-label">Pillar Breakdown — avg completion over period</div>
+      <div class="pillar-bars" id="pillarBars"></div>
+    </div>
+    <div class="card">
+      <div class="section-label">Meetings &amp; Calls by Week</div>
+      <table class="weekly-table">
+        <thead><tr><th>Week</th><th>Meetings</th><th>Status</th><th>Calls</th><th>Avg completion</th></tr></thead>
+        <tbody id="meetingsTable"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
 
-Sleep & Body
-0/4
-In bed by 10 pm
-pajamas on, teeth brushed
-Out of bed by 7 am
-5 min calisthenics
-upon waking
-20+ min cardio
-walk / run / bike
+<script>
+const SB_URL = 'https://bhzxfljpmsvfglijanj.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJoenhmbGpwbXNvdmZnbGlqYW5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3ODg3NzAsImV4cCI6MjA4OTM2NDc3MH0.Mj3liVYR2fyA0bYkmlF8Ndn6aD_AtJxLlK60db4dgXI';
 
-Prayer
-0/3
-Shacharis
-early, in shul — begin with surrender prayer
-Talk to G-d throughout the day
-Krias Shema al Hamitah
-abridged if needed
+function xhrRequest(method, path, body) {
+  return new Promise(function(resolve, reject) {
+    var xhr = new XMLHttpRequest();
+    xhr.open(method, SB_URL + '/rest/v1/' + path, true);
+    xhr.setRequestHeader('apikey', SB_KEY);
+    xhr.setRequestHeader('Authorization', 'Bearer ' + SB_KEY);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.setRequestHeader('Prefer', 'resolution=merge-duplicates,return=minimal');
+    xhr.timeout = 30000;
+    xhr.onload = function() {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try { resolve(xhr.responseText ? JSON.parse(xhr.responseText) : null); }
+        catch(e) { resolve(null); }
+      } else { reject(new Error('HTTP ' + xhr.status)); }
+    };
+    xhr.onerror = function() { reject(new Error('Network error')); };
+    xhr.ontimeout = function() { reject(new Error('Timeout')); };
+    xhr.send(body ? JSON.stringify(body) : null);
+  });
+}
 
-Recovery
-0/4
-1 page Big Book
-Workbook assignment
-Recovery calls
-−
-0
-+
-of 3 today
-call immediately at any urge
-Meeting attendance
-−
-0
-+
-today  ·  0/7 this week
-share at least twice per week
+function dbGet(key) { return xhrRequest('GET', 'recovery_days?id=eq.' + key + '&select=data'); }
+function dbUpsert(key, data) { return xhrRequest('POST', 'recovery_days', { id: key, data: data, updated_at: new Date().toISOString() }); }
+function dbGetMany(keys) {
+  if (!keys.length) return Promise.resolve([]);
+  return xhrRequest('GET', 'recovery_days?id=in.(' + keys.join(',') + ')&select=id,data');
+}
 
-Torah & Chassidus
-0/5
-Chitas
-Rambam
-3 min Gemara
-1 page Chassidus
-2 min Mishnayos
-THIS WEEK
-REFLECTION & NOTES
- 
-0
-days
-One day at a time
-toward 30 days
-Sobriety date:
+const CHECKBOX_IDS = ['s_bed','s_rise','s_cal','s_cardio','p_shach','p_talk','p_shema','r_bb','r_wb','t_chitas','t_rambam','t_gemara','t_chas','t_mishnayos'];
+const PILLAR_MAP = { sleep:['s_bed','s_rise','s_cal','s_cardio'], prayer:['p_shach','p_talk','p_shema'], recovery:['r_bb','r_wb'], torah:['t_chitas','t_rambam','t_gemara','t_chas','t_mishnayos'] };
+const PILLAR_TOTALS = { sleep:4, prayer:3, recovery:4, torah:5 };
+const PILLAR_COLORS = { sleep:'var(--sleep-c)', prayer:'var(--prayer-c)', recovery:'var(--recovery-c)', torah:'var(--torah-c)' };
+const PILLAR_NAMES = { sleep:'Sleep & Body', prayer:'Prayer', recovery:'Recovery', torah:'Torah & Chassidus' };
+const TOTAL = 15;
+const MSGS = ['Start your day','Keep going...','Halfway there!','Almost there!','Day complete!'];
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const DAYS_SHORT = ['S','M','T','W','T','F','S'];
+const DAYS_FULL = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+var currentDate = todayKey();
+var rangeWeeks = 4;
+var cache = {};
+var syncTimer = null;
+var noteTimer = null;
+var pendingKey = null;
+var pendingData = null;
+var retryCount = 0;
+var retryDelays = [0, 3000, 8000, 20000, 45000];
+
+function pad(n){ return String(n).padStart(2,'0'); }
+function todayKey(){ var n=new Date(); return n.getFullYear()+'-'+pad(n.getMonth()+1)+'-'+pad(n.getDate()); }
+function keyFromDate(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+function dateFromKey(k){ return new Date(k+'T12:00:00'); }
+function emptyDay(){ return {checks:{},calls:0,meetings:0,note:''}; }
+
+function setSyncStatus(state,msg){
+  document.getElementById('syncDot').className='sync-dot '+state;
+  document.getElementById('syncLabel').textContent=msg;
+}
+function lSave(k,d){ try{ localStorage.setItem('r_'+k,JSON.stringify(d)); }catch(e){} }
+function lLoad(k){ try{ return JSON.parse(localStorage.getItem('r_'+k)||'null'); }catch(e){ return null; } }
+
+function normalizeDay(d){
+  if(!d) d={};
+  if(!d.checks) d.checks={};
+  if(d.calls===undefined) d.calls=0;
+  if(d.meetings===undefined) d.meetings=0;
+  if(!d.note) d.note='';
+  return d;
+}
+
+async function loadDay(key){
+  if(!cache[key]){ var local=lLoad(key); if(local) cache[key]=local; }
+  try {
+    var rows=await dbGet(key);
+    var d=normalizeDay(rows&&rows.length ? rows[0].data : null);
+    cache[key]=d; lSave(key,d); return d;
+  } catch(e){
+    setSyncStatus('error','Offline — data saved locally');
+    return normalizeDay(cache[key]||lLoad(key));
+  }
+}
+
+function saveDay(key,data){
+  cache[key]=data; lSave(key,data);
+  pendingKey=key; pendingData=data; retryCount=0;
+  setSyncStatus('syncing','Saving...');
+  clearTimeout(syncTimer);
+  attemptSave(key,data);
+}
+
+async function attemptSave(key,data){
+  if(pendingKey!==key) return;
+  try {
+    await dbUpsert(key,data);
+    pendingKey=null; pendingData=null; retryCount=0;
+    setSyncStatus('synced','All changes saved');
+  } catch(e){
+    retryCount++;
+    if(retryCount<retryDelays.length){
+      setSyncStatus('syncing','Retrying... ('+retryCount+')');
+      syncTimer=setTimeout(function(){ attemptSave(key,data); },retryDelays[retryCount]);
+    } else {
+      setSyncStatus('error','Could not reach cloud — saved locally');
+    }
+  }
+}
+
+window.addEventListener('beforeunload',function(){
+  if(pendingKey&&pendingData){
+    var xhr=new XMLHttpRequest();
+    xhr.open('POST',SB_URL+'/rest/v1/recovery_days',false);
+    xhr.setRequestHeader('apikey',SB_KEY);
+    xhr.setRequestHeader('Authorization','Bearer '+SB_KEY);
+    xhr.setRequestHeader('Content-Type','application/json');
+    xhr.setRequestHeader('Prefer','resolution=merge-duplicates,return=minimal');
+    try{ xhr.send(JSON.stringify({id:pendingKey,data:pendingData,updated_at:new Date().toISOString()})); }catch(err){}
+  }
+});
+
+async function loadBulk(keys){
+  var missing=keys.filter(function(k){ return !cache[k]; });
+  missing.forEach(function(k){ var l=lLoad(k); if(l) cache[k]=l; });
+  var still=missing.filter(function(k){ return !cache[k]; });
+  if(!still.length) return;
+  try {
+    var rows=await dbGetMany(still);
+    if(rows) rows.forEach(function(row){ cache[row.id]=normalizeDay(row.data); lSave(row.id,cache[row.id]); });
+    still.forEach(function(k){ if(!cache[k]) cache[k]=emptyDay(); });
+  } catch(e){ still.forEach(function(k){ if(!cache[k]) cache[k]=emptyDay(); }); }
+}
+
+function getCache(k){ return cache[k]||emptyDay(); }
+
+function countChecked(data){
+  var n=CHECKBOX_IDS.filter(function(id){ return data.checks&&data.checks[id]; }).length;
+  if((data.calls||0)>=3) n++;
+  if((data.meetings||0)>=1) n++;
+  return n;
+}
+
+async function toggle(id){
+  var data=await loadDay(currentDate);
+  data.checks[id]=!data.checks[id];
+  renderUI(data); saveDay(currentDate,data);
+}
+
+async function adjustCounter(type,delta){
+  var data=await loadDay(currentDate);
+  if(type==='calls') data.calls=Math.max(0,Math.min(10,(data.calls||0)+delta));
+  if(type==='meetings') data.meetings=Math.max(0,Math.min(5,(data.meetings||0)+delta));
+  renderUI(data); saveDay(currentDate,data);
+}
+
+function switchTab(name,btn){
+  document.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+  document.getElementById('tab-'+name).classList.add('active');
+  btn.classList.add('active');
+  if(name==='progress') renderProgress();
+}
+
+async function renderToday(){
+  setSyncStatus('syncing','Loading...');
+  var data=await loadDay(currentDate);
+  setSyncStatus('synced','All changes saved');
+  renderUI(data);
+}
+
+function renderUI(data){
+  CHECKBOX_IDS.forEach(function(id){
+    var chk=document.getElementById('chk-'+id);
+    var row=document.getElementById('row-'+id);
+    if(!chk||!row) return;
+    var done=!!(data.checks&&data.checks[id]);
+    chk.className='habit-check'+(done?' done':'');
+    row.className='habit-row'+(done?' done':'');
+  });
+  var calls=data.calls||0, meetings=data.meetings||0;
+  document.getElementById('val-calls').textContent=calls;
+  document.getElementById('val-meetings').textContent=meetings;
+  document.getElementById('callsNum').textContent=Math.min(calls,3)+'/3';
+  Object.keys(PILLAR_MAP).forEach(function(p){
+    var done=PILLAR_MAP[p].filter(function(id){ return data.checks&&data.checks[id]; }).length+(p==='recovery'?((calls>=3?1:0)+(meetings>=1?1:0)):0);
+    document.getElementById('cnt-'+p).textContent=done+'/'+PILLAR_TOTALS[p];
+  });
+  var totalDone=countChecked(data), pct=Math.round(totalDone/TOTAL*100);
+  document.getElementById('progressCircle').style.strokeDashoffset=188.5-(188.5*pct/100);
+  document.getElementById('ringPct').textContent=pct+'%';
+  document.getElementById('progressBarFill').style.width=pct+'%';
+  document.getElementById('progressSub').textContent=totalDone+' of '+TOTAL+' habits complete';
+  document.getElementById('progressTitle').textContent=MSGS[pct===100?4:pct>=75?3:pct>=50?2:pct>0?1:0];
+  document.getElementById('noteArea').value=data.note||'';
+  renderDateDisplay(); renderWeekStrip(); renderStreaks();
+}
+
+function renderDateDisplay(){
+  var d=dateFromKey(currentDate);
+  var diff=Math.round((dateFromKey(currentDate)-dateFromKey(todayKey()))/86400000);
+  var prefix=diff===0?'Today — ':diff===-1?'Yesterday — ':diff===1?'Tomorrow — ':'';
+  document.getElementById('dateDisplay').textContent=prefix+DAYS_FULL[d.getDay()]+', '+MONTHS[d.getMonth()]+' '+d.getDate();
+}
+
+function getWeekKeys(refKey){
+  var d=dateFromKey(refKey),dow=d.getDay(),keys=[];
+  for(var i=0;i<7;i++){ var dd=new Date(d); dd.setDate(d.getDate()-dow+i); keys.push(keyFromDate(dd)); }
+  return keys;
+}
+
+function renderWeekStrip(){
+  var weekKeys=getWeekKeys(currentDate),today=todayKey();
+  var container=document.getElementById('weekGrid'); container.innerHTML='';
+  var wm=0;
+  weekKeys.forEach(function(key,i){
+    var d=getCache(key); wm+=(d.meetings||0);
+    var done=countChecked(d),pct=done>0?Math.round(done/TOTAL*100):0;
+    var dd=dateFromKey(key);
+    var cls=pct===100?'full':pct>0?'partial':'';
+    if(key===today) cls=(cls+' today').trim();
+    var col=document.createElement('div'); col.className='day-col';
+    col.innerHTML='<div class="day-name">'+DAYS_SHORT[i]+'</div><div class="day-circle '+cls+'" data-key="'+key+'">'+dd.getDate()+'</div><div class="day-pct">'+(pct>0?pct+'%':'')+'</div>';
+    col.querySelector('.day-circle').addEventListener('click',function(){ currentDate=this.dataset.key; renderToday(); });
+    container.appendChild(col);
+  });
+  document.getElementById('week-meetings').textContent=wm;
+  document.getElementById('meetingsNum').textContent=wm+'/7';
+}
+
+function renderStreaks(){
+  var today=todayKey(),streak=0,d=new Date(today+'T12:00:00');
+  for(var i=0;i<365;i++){
+    var key=keyFromDate(d);
+    if(countChecked(getCache(key))===0) break;
+    streak++; d.setDate(d.getDate()-1);
+  }
+  document.getElementById('streakNum').textContent=streak;
+  document.getElementById('totalNum').textContent=Object.values(cache).filter(function(d){ return countChecked(d)>0; }).length;
+}
+
+async function changeDay(n){ var d=dateFromKey(currentDate); d.setDate(d.getDate()+n); currentDate=keyFromDate(d); await renderToday(); }
+async function goToday(){ currentDate=todayKey(); await renderToday(); }
+
+document.getElementById('noteArea').addEventListener('input',async function(){
+  var data=await loadDay(currentDate); data.note=this.value;
+  var ind=document.getElementById('saveIndicator'); ind.style.opacity='1'; ind.textContent='Saving...';
+  clearTimeout(noteTimer);
+  noteTimer=setTimeout(async function(){ await saveDay(currentDate,data); ind.textContent='Saved'; setTimeout(function(){ ind.style.opacity='0'; },1500); },800);
+});
+
+function getDays(weeks){
+  var days=[],d=new Date(todayKey()+'T12:00:00');
+  for(var i=(weeks*7)-1;i>=0;i--){ var dd=new Date(d); dd.setDate(d.getDate()-i); days.push(keyFromDate(dd)); }
+  return days;
+}
+function getWeeks(weeks){
+  var result=[],today=new Date(todayKey()+'T12:00:00');
+  for(var w=weeks-1;w>=0;w--){
+    var anchor=new Date(today); anchor.setDate(today.getDate()-(w*7));
+    result.push(getWeekKeys(keyFromDate(anchor)));
+  }
+  return result;
+}
+
+function setRange(weeks,btn){
+  rangeWeeks=weeks;
+  document.querySelectorAll('.range-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  renderProgress();
+}
+
+async function renderProgress(){
+  var days=getDays(rangeWeeks);
+  await loadBulk(days);
+  var weeks=getWeeks(rangeWeeks);
+  var activeDays=days.filter(function(k){ return countChecked(getCache(k))>0; }).length;
+  var allPcts=days.map(function(k){ var d=getCache(k),n=countChecked(d); return n>0?Math.round(n/TOTAL*100):null; }).filter(function(x){ return x!==null; });
+  var avgPct=allPcts.length?Math.round(allPcts.reduce(function(a,b){ return a+b; },0)/allPcts.length):0;
+  var totalMeetings=days.reduce(function(a,k){ return a+(getCache(k).meetings||0); },0);
+  var totalCalls=days.reduce(function(a,k){ return a+(getCache(k).calls||0); },0);
+  document.getElementById('summaryStats').innerHTML='<div class="stat-mini"><div class="stat-mini-num">'+activeDays+'</div><div class="stat-mini-label">days tracked</div></div><div class="stat-mini"><div class="stat-mini-num">'+avgPct+'%</div><div class="stat-mini-label">avg daily completion</div></div><div class="stat-mini"><div class="stat-mini-num">'+totalMeetings+'</div><div class="stat-mini-label">meetings attended</div></div><div class="stat-mini"><div class="stat-mini-num">'+totalCalls+'</div><div class="stat-mini-label">recovery calls made</div></div>';
+  var hmGrid=document.getElementById('heatmapGrid'); hmGrid.innerHTML='';
+  days.forEach(function(key){
+    var d=getCache(key),n=countChecked(d),pct=n>0?n/TOTAL:0;
+    var cls=pct===0?'p0':pct<0.35?'p1':pct<0.6?'p2':pct<0.9?'p3':'p4';
+    var cell=document.createElement('div'); cell.className='hm-cell '+cls;
+    cell.title=key+(n>0?' — '+Math.round(pct*100)+'% complete':' — no data');
+    hmGrid.appendChild(cell);
+  });
+  var hmRow=document.getElementById('hmMonthRow'); hmRow.innerHTML=''; var lastM=-1;
+  days.forEach(function(key){ var m=dateFromKey(key).getMonth(); if(m!==lastM){ var s=document.createElement('span'); s.textContent=MONTHS[m]; s.style.cssText='font-size:10px;color:var(--text-soft);margin-right:6px;'; hmRow.appendChild(s); lastM=m; } });
+  var barsEl=document.getElementById('weeklyBars'); barsEl.innerHTML='';
+  weeks.forEach(function(wkeys){
+    var pcts=wkeys.map(function(k){ var d=getCache(k),n=countChecked(d); return n>0?n/TOTAL*100:0; });
+    var avg=Math.round(pcts.reduce(function(a,b){ return a+b; },0)/7);
+    var startD=dateFromKey(wkeys[0]),lbl=MONTHS[startD.getMonth()]+' '+startD.getDate();
+    var h=avg>0?Math.max(4,Math.round(avg*1.1)):2;
+    var col=document.createElement('div'); col.className='bar-col-c';
+    col.innerHTML='<div class="bar-val-lbl">'+(avg>0?avg+'%':'')+'</div><div class="bar-fill-el" style="height:'+h+'px;opacity:'+(avg>0?1:0.25)+'"></div><div class="bar-lbl">'+lbl+'</div>';
+    barsEl.appendChild(col);
+  });
+  var pbEl=document.getElementById('pillarBars'); pbEl.innerHTML='';
+  Object.keys(PILLAR_MAP).forEach(function(p){
+    var ids=PILLAR_MAP[p],total=PILLAR_TOTALS[p];
+    var active=days.map(function(k){ return getCache(k); }).filter(function(d){ return countChecked(d)>0; });
+    var avg=active.length?Math.round(active.reduce(function(a,d){
+      var done=ids.filter(function(id){ return d.checks&&d.checks[id]; }).length+(p==='recovery'?((d.calls||0)>=3?1:0)+((d.meetings||0)>=1?1:0):0);
+      return a+(done/total*100);
+    },0)/active.length):0;
+    var row=document.createElement('div'); row.className='pb-row';
+    row.innerHTML='<div class="pb-label" style="color:'+PILLAR_COLORS[p]+'">'+PILLAR_NAMES[p]+'</div><div class="pb-track"><div class="pb-fill" style="width:'+avg+'%;background:'+PILLAR_COLORS[p]+'"></div></div><div class="pb-pct">'+avg+'%</div>';
+    pbEl.appendChild(row);
+  });
+  var tbody=document.getElementById('meetingsTable'); tbody.innerHTML='';
+  weeks.forEach(function(wkeys){
+    var startD=dateFromKey(wkeys[0]),endD=dateFromKey(wkeys[6]);
+    var wm=wkeys.reduce(function(a,k){ return a+(getCache(k).meetings||0); },0);
+    var wc=wkeys.reduce(function(a,k){ return a+(getCache(k).calls||0); },0);
+    var pcts=wkeys.map(function(k){ var d=getCache(k),n=countChecked(d); return n>0?n/TOTAL*100:null; }).filter(function(x){ return x!==null; });
+    var avgComp=pcts.length?Math.round(pcts.reduce(function(a,b){ return a+b; },0)/pcts.length):0;
+    var ms=wm>=7?'pill-green':wm>=4?'pill-amber':'pill-red';
+    var ml=wm>=7?'Goal met':wm>=4?'Partial':'Below goal';
+    var wlbl=MONTHS[startD.getMonth()]+' '+startD.getDate()+' - '+MONTHS[endD.getMonth()]+' '+endD.getDate();
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td>'+wlbl+'</td><td>'+wm+'/7</td><td><span class="pill '+ms+'">'+ml+'</span></td><td>'+wc+'</td><td>'+(avgComp>0?avgComp+'%':'—')+'</td>';
+    tbody.appendChild(tr);
+  });
+}
+
+var SOB_MILESTONES = [30,60,90,180,365];
+var SOB_LABELS = ['30d','60d','90d','6mo','1yr'];
+var SOB_TITLES = ['One day at a time','Building momentum','Keep going strong','Halfway to 6 months','Almost a year','One year — incredible'];
+
+function updateSobriety(){
+  var val=document.getElementById('sobDate').value;
+  try{ localStorage.setItem('r_sobdate',val); }catch(e){}
+  renderSobriety(val);
+}
+
+function renderSobriety(val){
+  if(!val) return;
+  var start=new Date(val+'T00:00:00');
+  var days=Math.max(0,Math.floor((new Date()-start)/86400000));
+  document.getElementById('sobDays').textContent=days;
+  var next=SOB_MILESTONES.find(function(m){ return m>days; })||SOB_MILESTONES[SOB_MILESTONES.length-1];
+  var pct=Math.min(days/next,1);
+  document.getElementById('sobCircle').style.strokeDashoffset=213.6-(213.6*pct);
+  var ti=days>=365?5:days>=180?4:days>=90?3:days>=60?2:days>=30?1:0;
+  document.getElementById('sobTitle').textContent=SOB_TITLES[ti];
+  var rem=next-days;
+  document.getElementById('sobSub').textContent=days>=365?'Beyond one year':rem+' day'+(rem===1?'':'s')+' to '+(next>=365?'1 year':next>=180?'6 months':next+' days');
+  var mRow=document.getElementById('sobMilestones'); mRow.innerHTML='';
+  SOB_MILESTONES.forEach(function(m,i){
+    var reached=days>=m, isNext=m===next&&days<m;
+    var div=document.createElement('div');
+    div.style.cssText='display:flex;align-items:center;gap:4px;padding:3px 8px;border-radius:99px;font-size:11px;font-weight:700;border:0.5px solid;'+(reached?'background:#e1f5ee;border-color:#5DCAA5;color:#085041':isNext?'background:#fff;border-color:#1D9E75;color:#0F6E56':'background:#f1efe8;border-color:#d3d1c7;color:#a09c95');
+    var dot=document.createElement('div');
+    dot.style.cssText='width:7px;height:7px;border-radius:50%;flex-shrink:0;'+(reached?'background:#5DCAA5':isNext?'border:1.5px solid #1D9E75':'background:#d3d1c7');
+    div.appendChild(dot);
+    div.appendChild(document.createTextNode(SOB_LABELS[i]));
+    mRow.appendChild(div);
+  });
+}
+
+function initSobriety(){
+  var saved='';
+  try{ saved=localStorage.getItem('r_sobdate')||''; }catch(e){}
+  if(saved){ document.getElementById('sobDate').value=saved; renderSobriety(saved); }
+}
+
+renderToday();
+initSobriety();
+</script>
+</body>
+</html>
